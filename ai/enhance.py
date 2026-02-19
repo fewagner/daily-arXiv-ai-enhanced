@@ -89,6 +89,7 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
                     code_info["code_last_update"] = data.get("pushed_at", "")[:10]
             except Exception:
                 # API 调用失败不影响主流程
+                print('Error in api')
                 pass
             return code_info
 
@@ -167,7 +168,12 @@ def process_single_item(chain, item: Dict, language: str) -> Dict:
 
 def process_all_items(data: List[Dict], model_name: str, language: str, max_workers: int) -> List[Dict]:
     """并行处理所有数据项"""
-    llm = ChatOpenAI(model=model_name).with_structured_output(Structure, method="function_calling")
+
+    llm = ChatOpenAI(
+      model=model_name,
+      use_responses_api=True,
+      base_url="https://api.openai.com/v1",
+    ).with_structured_output(Structure, method="function_calling")
     print('Connect to:', model_name, file=sys.stderr)
     
     prompt_template = ChatPromptTemplate.from_messages([
